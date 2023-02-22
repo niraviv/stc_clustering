@@ -76,6 +76,10 @@ class ClusteringLayer(tf.keras.layers.Layer):
         return dict(list(base_config.items()) + list(config.items()))
 
 
+def custom_loss(y_true, y_pred):
+    return tf.keras.losses.KLDivergence(y_true, y_pred) * 10000
+
+
 class STC(object):
     def __init__(self,
                  dims,
@@ -143,7 +147,7 @@ class STC(object):
         weight = q ** 2 / q.sum(0)
         return (weight.T / weight.sum(1)).T
 
-    def compile(self, optimizer='sgd', loss='kld'):
+    def compile(self, optimizer='sgd', loss=custom_loss):
         self.model.compile(optimizer=optimizer, loss=loss)
 
     def fit(self, x, y=None, maxiter=2e4, batch_size=256, tol=1e-3,
@@ -184,7 +188,7 @@ class STC(object):
                     break
 
             idx = index_array[index * batch_size: min((index + 1) * batch_size, x.shape[0])]
-            loss = self.model.train_on_batch(x=x[idx], y=p[idx])
+            loss = self.model.train_on_batch(x=x[idx], y=p[idx]) * 1000
             index = index + 1 if (index + 1) * batch_size <= x.shape[0] else 0
 
             ite += 1
