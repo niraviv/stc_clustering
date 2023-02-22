@@ -106,3 +106,4 @@ venv.bak/
 .idea
 
 data/leetcode/glove.*.txt
+data/leetcode/results/
