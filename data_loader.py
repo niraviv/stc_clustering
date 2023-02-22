@@ -12,32 +12,117 @@ import json
 from gensim.models import Word2Vec
 
 ENCODING = 'utf-8'
-SIF_ALPHA = 0.1
+
+# Play with these for different experiments:
+EXPERIMENT_PARAMS = {
+    'sif_alpha': 0.1,  # any float
+    'min_word_count': 1,  # any integer
+    'word_embedding': 'ada',  # word2vec / glove / ada
+    'target': 'difficulty',  # difficulty / simple_topics
+    'input_text': 'title'  # body / title / any other single key in leetcode_questions_parsed.json
+}
+
+
+def simple_topic_tag(q):
+    q = q.lower()
+    if 'tree' in q:
+        return 0
+    if 'array' in q or 'list' in q:
+        return 1
+    if 'string' in q:
+        return 2
+    if 'maximum' in q or 'minimum' in q:
+        return 3
+    if 'number' in q or 'integer' in q:
+        return 4
+    return 5
+
+
+class Experiment:
+    def __init__(self, data_path):
+        for k, v in EXPERIMENT_PARAMS.items():
+            print(f'{k}: {v}')
+        self.data_path = data_path
+        self._load_questions()
+        self._build_word_embeddings()
+        self._load_target()
+        self._print_statistics()
+
+    def _load_questions(self):
+        with open(self.data_path + 'leetcode_questions_parsed.json', 'r') as f:
+            self.leetcode_json = json.load(f)
+        self.input_text = EXPERIMENT_PARAMS['input_text']
+        self.questions = [v[self.input_text] for k, v in self.leetcode_json.items()]
+        self.questions = [q.lower() for q in self.questions]
+
+    def _build_word_embeddings(self):
+        self.word_embedding = EXPERIMENT_PARAMS['word_embedding']
+        self.sif_alpha = EXPERIMENT_PARAMS['sif_alpha']
+        self.min_word_count = EXPERIMENT_PARAMS['min_word_count']
+        tokenized_questions = [nltk.word_tokenize(q) for q in self.questions]
+        flattened_questions = [word for q in tokenized_questions for word in q]
+        word_counts = Counter(flattened_questions)
+        word_counts = {k: word_counts[k] for k in word_counts if word_counts[k] >= self.min_word_count}
+        total_count = sum([v for v in word_counts.values()])
+        word_props = {k: word_counts[k] / total_count for k in word_counts}
+        word_weights = {k: self.sif_alpha / (self.sif_alpha + word_props[k]) for k in word_props}
+        self.vocabulary_size = len(word_weights)
+        if self.word_embedding == 'ada':
+            if self.input_text == 'body':
+                file_name = 'leetcode_ada_embeddings4.json'
+            elif self.input_text == 'title':
+                file_name = 'leetcode_titles_ada_embeddings4.json'
+            else:
+                raise Exception(f'ada embedding not supported for {self.input_text}')
+            with open(self.data_path + file_name, 'r') as f:
+                embeddings_json = json.load(f)
+            self.X = np.array([v for k, v in embeddings_json.items()])
+            return
+        elif self.word_embedding == 'word2vec':
+            word_embeddings = Word2Vec(
+                sentences=tokenized_questions, size=100, window=5, min_count=self.min_word_count, workers=4)
+        elif self.word_embedding == 'glove':
+            word_embeddings = {}
+            with open(self.data_path + "glove.42B.300d.txt", 'r', encoding=ENCODING) as f:
+                for line in f:
+                    values = line.split()
+                    word = values[0]
+                    vector = np.asarray(values[1:], "float32")
+                    word_embeddings[word] = vector
+        else:
+            raise Exception(f'Bad word embedding: {self.word_embedding}')
+        question_vectors = np.array([sum([word_weights[w] * word_embeddings[w]
+                                          for w in q if w in word_weights and w in word_embeddings])
+                                     for q in tokenized_questions])
+        pca_model = PCA(n_components=1)
+        pca_model.fit(question_vectors)
+        pca_component = pca_model.components_
+        vectors_minus_component = question_vectors - question_vectors.dot(pca_component.transpose()) * pca_component
+        scaler = MinMaxScaler()
+        self.X = scaler.fit_transform(vectors_minus_component)
+
+    def _load_target(self):
+        self.target = EXPERIMENT_PARAMS['target']
+        if self.target == 'difficulty':
+            labels = [v['label'] for k, v in self.leetcode_json.items()]
+            label_to_int_dict = {'Easy': 0, 'Medium': 1, 'Hard': 2}
+            self.y = np.array([label_to_int_dict[t] for t in labels])
+        elif self.target == 'simple_topics':
+            self.y = np.array([simple_topic_tag(q) for q in self.questions])
+        else:
+            raise Exception(f'Bad target: {self.target}')
+
+    def _print_statistics(self):
+        print('Number of texts:', len(self.questions))
+        print('Average number of tokens per text: ', sum([len(q) for q in self.questions]) / len(self.questions))
+        print('Vocabulary size: ', self.vocabulary_size)
+        for c in np.unique(self.y):
+            print(f'Texts in class {c}: ', sum(self.y == c))
 
 
 def load_leetcode(data_path='data/leetcode/'):
-    with open(data_path + 'leetcode_questions_parsed.json', 'r') as f:
-        parsed_json = json.load(f)
-    questions = [v['body'] for k, v in parsed_json.items()]
-    tokenized_questions = [nltk.word_tokenize(q) for q in questions]
-    flattened_questions = [word for q in tokenized_questions for word in q]
-    word_counts = Counter(flattened_questions)
-    total_count = sum(word_counts.values())
-    word_props = {k: word_counts[k] / total_count for k in word_counts}
-    word_weights = {k: SIF_ALPHA / (SIF_ALPHA + word_props[k]) for k in word_props}
-    # parameters can be tweaked, or use pretrained:
-    word2vec_model = Word2Vec(sentences=tokenized_questions, size=100, window=5, min_count=1, workers=4)
-    question_vectors = np.array([sum([word_weights[w] * word2vec_model[w] for w in q]) for q in tokenized_questions])
-    pca_model = PCA(n_components=1)
-    pca_model.fit(question_vectors)
-    pca_component = pca_model.components_
-    vectors_minus_component = question_vectors - question_vectors.dot(pca_component.transpose()) * pca_component
-    scaler = MinMaxScaler()
-    X = scaler.fit_transform(vectors_minus_component)
-    labels = [v['label'] for k, v in parsed_json.items()]
-    label_to_int_dict = {'Easy': 0, 'Medium': 1, 'Hard': 2}
-    y = np.array([label_to_int_dict[t] for t in labels])
-    return X, y
+    experiment = Experiment(data_path)
+    return experiment.X, experiment.y
 
 
 def load_stackoverflow(data_path='data/stackoverflow/'):
