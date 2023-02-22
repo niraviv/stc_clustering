@@ -18,9 +18,24 @@ EXPERIMENT_PARAMS = {
     'sif_alpha': 0.1,  # any float
     'min_word_count': 1,  # any integer
     'word_embedding': 'ada',  # word2vec / glove / ada
-    'target': 'difficulty',  # difficulty / simple_topics
+    'target': 'story',  # difficulty / simple_topics / story
     'input_text': 'title'  # body / title / any other single key in leetcode_questions_parsed.json
 }
+
+STORY_WORDS = [
+    'exam', 'red', 'her', 'turn', 'act', 'win', 'order', 'ice', 'sit', 'eat', 'ant', 'ring', 'cat', 'sent', 'rent',
+    'time', 'star', 'rule', 'dice', 'sea', 'cut', 'ask', 'age', 'art', 'point', 'direction', 'bar', 'king', 'man',
+    'play', 'class', 'gene', 'ping', 'reach', 'tie', 'rob', 'person', 'son', 'lie', 'west', 'lock', 'board', 'work',
+    'car', 'she', 'rest', 'lane', 'city', 'game', 'table', 'lose', 'free', 'sell', 'buy', 'die', 'customer', 'cost',
+    'color', 'front', 'student', 'seat', 'eat', 'room', 'language', 'clock', 'trip', 'white', 'ball', 'box', 'road',
+    'angle', 'money', 'unit', 'circular', 'press', 'train', 'visit', 'site', 'water', 'date', 'north', 'walk', 'south',
+    'employee', 'price', 'pay', 'power', 'day', 'player', 'media', 'Alice', 'Bob', 'children', 'quest', 'friend',
+    'face', 'minute', 'hour', 'higher', 'cycle', 'pile', 'store', 'vision', 'travel', 'wall', 'cities', 'outside',
+    'collect', 'express', 'candies', 'blue', 'house', 'rounded', 'broken', 'chess', 'shape', 'image', 'cab', 'robot',
+    'stock', 'member', 'colored', 'speed', 'night', 'building', 'obstacle', 'company', 'course', 'shop', 'candy',
+    'sold', 'banana', 'street', 'paint', 'salary', 'boring', 'drive', 'puzzle', 'book', 'doll', 'fee', 'garden',
+    'dollar', 'jump', 'pancake'
+]
 
 
 def simple_topic_tag(q):
@@ -108,7 +123,11 @@ class Experiment:
             label_to_int_dict = {'Easy': 0, 'Medium': 1, 'Hard': 2}
             self.y = np.array([label_to_int_dict[t] for t in labels])
         elif self.target == 'simple_topics':
-            self.y = np.array([simple_topic_tag(q) for q in self.questions])
+            titles = [v['title'] for k, v in self.leetcode_json.items()]
+            self.y = np.array([simple_topic_tag(q) for q in titles])
+        elif self.target == 'story':
+            bodies = [v['title'] for k, v in self.leetcode_json.items()]
+            self.y = np.array([int(any([w in q for w in STORY_WORDS])) for q in bodies])
         else:
             raise Exception(f'Bad target: {self.target}')
 
