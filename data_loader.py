@@ -19,7 +19,7 @@ EXPERIMENT_PARAMS = {
     'min_word_count': 1,  # any integer
     'word_embedding': 'ada',  # word2vec / glove / ada
     'target': 'story',  # difficulty / simple_topics / story
-    'input_text': 'body'  # body / title / any other single key in leetcode_questions_parsed.json
+    'input_text': 'title'  # body / title / any other single key in leetcode_questions_parsed.json
 }
 
 STORY_WORDS = [

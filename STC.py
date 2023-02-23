@@ -18,6 +18,7 @@ nltk.download('punkt')
 
 
 KMEANS_INIT = 'slightly_supervised'  # default / slightly_supervised
+KMEANS_N_INIT = 5
 
 
 def slightly_supervised_kmeans_init(X, n_clusters, random_state):
@@ -167,9 +168,9 @@ class STC(object):
         # Step 1: initialize cluster centers using k-means
         print('Initializing cluster centers with k-means.')
         if KMEANS_INIT == 'default':
-            kmeans = KMeans(n_clusters=self.n_clusters, n_init=100)
+            kmeans = KMeans(n_clusters=self.n_clusters, n_init=KMEANS_N_INIT)
         elif KMEANS_INIT == 'slightly_supervised':
-            kmeans = KMeans(n_clusters=self.n_clusters, n_init=100, init=slightly_supervised_kmeans_init)
+            kmeans = KMeans(n_clusters=self.n_clusters, n_init=KMEANS_N_INIT, init=slightly_supervised_kmeans_init)
         else:
             raise Exception(f'Bad kmeans initialization: {KMEANS_INIT}')
         y_pred = kmeans.fit_predict(self.encoder.predict(x))
