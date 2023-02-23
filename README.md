@@ -24,9 +24,12 @@ Experiment results:
 | Title | Simple topics     | Word2vec  | Kmeans       | 0.1       | 10.5% | 35.2% |
 | Title | Simple topics     | GloVe     | Kmeans       | 0.1       | 23.5% | 47.2% |
 | Title | Simple topics     | ada       | Kmeans       | --        | 32.5% | 57.9% |
-| Title | Story             | Word2vec  | Kmeans       | 0.1       | 0.2%  | 52.6% |
-| Title | Story             | GloVe     | Kmeans       | 0.1       | 0.9%  | 55.8% |
-| Title | Story             | ada       | Kmeans       | --        | 2.3%  | 58.6% |
+| Title | Story             | Word2vec  | Kmeans       | 0.1       | 52.2% | 0.1%  |
+| Title | Story             | GloVe     | Kmeans       | 0.1       | 64.3% | 9.8%  |
+| Title | Story             | ada       | Kmeans       | --        | 70.3% | 13.0% |
+| Body  | Story             | Word2vec  | Kmeans       | 0.1       | 53.3% | 0.1%  |
+| Body  | Story             | GloVe     | Kmeans       | 0.1       | 50.2% | 1.1%  |
+| Body  | Story             | ada       | Kmeans       | --        | 50.1% | 0.8%  |
 
 Dataset statistics:
 
@@ -58,5 +61,5 @@ For the **story** target clustering, the number of texts in each class:
 
 | Class | Number of texts |
 |-------|-----------------|
-| 0     | 1066            |
-| 1     | 622             |
+| 0     | 1032            |
+| 1     | 656             |

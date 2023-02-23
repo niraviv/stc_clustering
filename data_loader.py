@@ -19,7 +19,7 @@ EXPERIMENT_PARAMS = {
     'min_word_count': 1,  # any integer
     'word_embedding': 'ada',  # word2vec / glove / ada
     'target': 'story',  # difficulty / simple_topics / story
-    'input_text': 'title'  # body / title / any other single key in leetcode_questions_parsed.json
+    'input_text': 'body'  # body / title / any other single key in leetcode_questions_parsed.json
 }
 
 STORY_WORDS = [
@@ -126,8 +126,8 @@ class Experiment:
             titles = [v['title'] for k, v in self.leetcode_json.items()]
             self.y = np.array([simple_topic_tag(q) for q in titles])
         elif self.target == 'story':
-            bodies = [v['title'] for k, v in self.leetcode_json.items()]
-            self.y = np.array([int(any([w in q for w in STORY_WORDS])) for q in bodies])
+            titles_and_bodies = [f"{v['title']} {v['body']}" for k, v in self.leetcode_json.items()]
+            self.y = np.array([int(any([f' {w.lower()} ' in q for w in STORY_WORDS])) for q in titles_and_bodies])
         else:
             raise Exception(f'Bad target: {self.target}')
 
@@ -135,8 +135,14 @@ class Experiment:
         print('Number of texts:', len(self.questions))
         print('Average number of tokens per text: ', sum([len(q) for q in self.questions]) / len(self.questions))
         print('Vocabulary size: ', self.vocabulary_size)
+        bodies = np.array([v['body'] for k, v in self.leetcode_json.items()])
         for c in np.unique(self.y):
             print(f'Texts in class {c}: ', sum(self.y == c))
+            examples = np.random.choice(bodies[self.y == c], size=5, replace=False)
+            for i, e in enumerate(examples):
+                print(f'Example {i + 1} for class {c}:')
+                print(e)
+                print()
 
 
 def load_leetcode(data_path='data/leetcode/'):
