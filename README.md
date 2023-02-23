@@ -13,23 +13,32 @@ folder. This file is available from https://nlp.stanford.edu/data/glove.42B.300d
 
 Experiment results:
 
-| Text  | Target clustering | Embedding | Cluster init | SIF alpha |  NMI  |  ACC  |
-|-------|-------------------|-----------|--------------|-----------|:-----:|:-----:|
-| Body  | Easy/Med/Hard     | Word2vec  | Kmeans       | 0.1       | 0.2%  | 44.3% |
-| Body  | Easy/Med/Hard     | GloVe     | Kmeans       | 0.1       | 0.4%  | 44.6% |
-| Body  | Easy/Med/Hard     | ada       | Kmeans       | --        | 0.6%  | 40.2% |
-| Title | Easy/Med/Hard     | Word2vec  | Kmeans       | 0.1       | 0.4%  | 36.0% |
-| Title | Easy/Med/Hard     | GloVe     | Kmeans       | 0.1       | 0.6%  | 37.5% |
-| Title | Easy/Med/Hard     | ada       | Kmeans       | --        | 0.2%  | 36.3% |
-| Title | Simple topics     | Word2vec  | Kmeans       | 0.1       | 10.5% | 35.2% |
-| Title | Simple topics     | GloVe     | Kmeans       | 0.1       | 23.5% | 47.2% |
-| Title | Simple topics     | ada       | Kmeans       | --        | 32.5% | 57.9% |
-| Title | Story             | Word2vec  | Kmeans       | 0.1       | 52.2% | 0.1%  |
-| Title | Story             | GloVe     | Kmeans       | 0.1       | 64.3% | 9.8%  |
-| Title | Story             | ada       | Kmeans       | --        | 70.3% | 13.0% |
-| Body  | Story             | Word2vec  | Kmeans       | 0.1       | 53.3% | 0.1%  |
-| Body  | Story             | GloVe     | Kmeans       | 0.1       | 50.2% | 1.1%  |
-| Body  | Story             | ada       | Kmeans       | --        | 50.1% | 0.8%  |
+| Text  | Target clustering | Embedding | Cluster init       | Num of cluster inits | NMI  |  ACC  |
+|-------|-------------------|-----------|--------------------|----------------------|:----:|:-----:|
+| Body  | Easy/Med/Hard     | Word2vec  | Kmeans             | 100                  | 0.2% | 44.3% |
+| Body  | Easy/Med/Hard     | GloVe     | Kmeans             | 100                  | 0.4% | 44.6% |
+| Body  | Easy/Med/Hard     | ada       | Kmeans             | 100                  | 0.6% | 40.2% |
+| Title | Easy/Med/Hard     | Word2vec  | Kmeans             | 100                  | 0.4% | 36.0% |
+| Title | Easy/Med/Hard     | GloVe     | Kmeans             | 100                  | 0.6% | 37.5% |
+| Title | Easy/Med/Hard     | ada       | Kmeans             | 100                  | 0.2% | 36.3% |
+| Body  | Simple topics     | Word2vec  | Kmeans             | 100                  |      |       |
+| Body  | Simple topics     | GloVe     | Kmeans             | 100                  |      |       |
+| Body  | Simple topics     | ada       | Kmeans             | 100                  |      |       |
+| Title | Simple topics     | Word2vec  | Kmeans             | 100                  |      |       |
+| Title | Simple topics     | GloVe     | Kmeans             | 100                  |      |       |
+| Title | Simple topics     | ada       | Kmeans             | 100                  |      |       |
+| Body  | Story             | Word2vec  | Kmeans             | 100                  |      |       |
+| Body  | Story             | GloVe     | Kmeans             | 100                  |      |       |
+| Body  | Story             | ada       | Kmeans             | 100                  |      |       |
+| Title | Story             | Word2vec  | Kmeans             | 100                  |      |       |
+| Title | Story             | GloVe     | Kmeans             | 100                  |      |       |
+| Title | Story             | ada       | Kmeans             | 100                  |      |       |
+| Title | Simple topics     | Word2vec  | Slight supervision | 3                    |      |       |
+| Title | Simple topics     | GloVe     | Slight supervision | 3                    |      |       |
+| Title | Simple topics     | ada       | Slight supervision | 3                    |      |       |
+| Title | Story             | Word2vec  | Slight supervision | 3                    |      |       |
+| Title | Story             | GloVe     | Slight supervision | 3                    |      |       |
+| Title | Story             | ada       | Slight supervision | 3                    |      |       |
 
 Dataset statistics:
 
@@ -42,12 +51,13 @@ For the **simple topics** target clustering, the number of texts in each class:
 
 | Class | Number of texts |
 |-------|-----------------|
-| 0     | 107             |
-| 1     | 226             |
+| 0     | 201             |
+| 1     | 145             |
 | 2     | 154             |
-| 3     | 176             |
-| 4     | 157             |
-| 5     | 868             |
+| 3     | 650             |
+| 4     | 116             |
+| 5     | 193             |
+| 6     | 229             |
 
 For the **Easy/Med/Hard** target clustering, the number of texts in each class:
 
@@ -61,5 +71,5 @@ For the **story** target clustering, the number of texts in each class:
 
 | Class | Number of texts |
 |-------|-----------------|
-| 0     | 1032            |
-| 1     | 656             |
+| 0     | 1688            |
+| 1     | 705             |

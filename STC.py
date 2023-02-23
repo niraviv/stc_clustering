@@ -16,9 +16,9 @@ from data_loader import load_data
 import nltk
 nltk.download('punkt')
 
-
-KMEANS_INIT = 'slightly_supervised'  # default / slightly_supervised
-KMEANS_N_INIT = 5
+# Play with these for differet experiments:
+KMEANS_INIT = 'default'  # default / slightly_supervised
+KMEANS_N_INIT = 100  # any integer
 
 
 def slightly_supervised_kmeans_init(X, n_clusters, random_state):
