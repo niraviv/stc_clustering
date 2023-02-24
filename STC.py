@@ -16,6 +16,16 @@ from data_loader import load_data
 import nltk
 nltk.download('punkt')
 
+# Play with these for different experiments:
+KMEANS_INIT = 'slightly_supervised'  # default / slightly_supervised
+KMEANS_N_INIT = 1  # any integer
+NUM_SUPERVISED_POINTS_PER_CLUSTER = 5  # any integer, for use in slightly supervised kmeans init
+
+
+def slightly_supervised_kmeans_init(X, n_clusters, random_state):
+    return np.array([X[y == i][np.random.choice(X[y == i].shape[0], size=NUM_SUPERVISED_POINTS_PER_CLUSTER)]
+                     for i in range(n_clusters)]).mean(axis=1)
+
 
 def autoencoder(dims, act=tf.nn.leaky_relu, init='glorot_uniform'):
     n_stacks = len(dims) - 1
@@ -159,7 +169,12 @@ class STC(object):
 
         # Step 1: initialize cluster centers using k-means
         print('Initializing cluster centers with k-means.')
-        kmeans = KMeans(n_clusters=self.n_clusters, n_init=100)
+        if KMEANS_INIT == 'default':
+            kmeans = KMeans(n_clusters=self.n_clusters, n_init=KMEANS_N_INIT)
+        elif KMEANS_INIT == 'slightly_supervised':
+            kmeans = KMeans(n_clusters=self.n_clusters, n_init=KMEANS_N_INIT, init=slightly_supervised_kmeans_init)
+        else:
+            raise Exception(f'Bad kmeans initialization: {KMEANS_INIT}')
         y_pred = kmeans.fit_predict(self.encoder.predict(x))
         y_pred_last = np.copy(y_pred)
         self.model.get_layer(name='clustering').set_weights([kmeans.cluster_centers_])

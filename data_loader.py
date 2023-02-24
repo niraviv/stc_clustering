@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import os
 from collections import Counter
 
 import nltk
@@ -11,6 +10,8 @@ from sklearn.preprocessing import MinMaxScaler
 import json
 from gensim.models import Word2Vec
 
+nltk.download('wordnet')
+
 ENCODING = 'utf-8'
 
 # Play with these for different experiments:
@@ -18,24 +19,51 @@ EXPERIMENT_PARAMS = {
     'sif_alpha': 0.1,  # any float
     'min_word_count': 1,  # any integer
     'word_embedding': 'ada',  # word2vec / glove / ada
-    'target': 'difficulty',  # difficulty / simple_topics
-    'input_text': 'title'  # body / title / any other single key in leetcode_questions_parsed.json
+    'target': 'story',  # difficulty / simple_topics / story
+    'input_text': 'title'  # body / title
 }
 
+STORY_WORDS = [
+    'exam', 'red', 'her', 'turn', 'act', 'win', 'order', 'ice', 'sit', 'eat', 'ant', 'ring', 'cat', 'sent', 'rent',
+    'time', 'star', 'rule', 'dice', 'sea', 'cut', 'ask', 'age', 'art', 'point', 'direction', 'bar', 'king', 'man',
+    'play', 'class', 'gene', 'ping', 'reach', 'tie', 'rob', 'person', 'son', 'lie', 'west', 'lock', 'board', 'work',
+    'car', 'she', 'rest', 'lane', 'city', 'game', 'table', 'lose', 'free', 'sell', 'buy', 'die', 'customer', 'cost',
+    'color', 'front', 'student', 'seat', 'eat', 'room', 'language', 'clock', 'trip', 'white', 'ball', 'box', 'road',
+    'angle', 'money', 'unit', 'circular', 'press', 'train', 'visit', 'site', 'water', 'date', 'north', 'walk', 'south',
+    'employee', 'price', 'pay', 'power', 'day', 'player', 'media', 'Alice', 'Bob', 'children', 'quest', 'friend',
+    'face', 'minute', 'hour', 'higher', 'cycle', 'pile', 'store', 'vision', 'travel', 'wall', 'cities', 'outside',
+    'collect', 'express', 'candies', 'blue', 'house', 'rounded', 'broken', 'chess', 'shape', 'image', 'cab', 'robot',
+    'stock', 'member', 'colored', 'speed', 'night', 'building', 'obstacle', 'company', 'course', 'shop', 'candy',
+    'sold', 'banana', 'street', 'paint', 'salary', 'boring', 'drive', 'puzzle', 'book', 'doll', 'fee', 'garden',
+    'dollar', 'jump', 'pancake'
+]
 
-def simple_topic_tag(q):
-    q = q.lower()
-    if 'tree' in q:
+
+def topic(q):
+    title = q['title']
+    body = q['body']
+    if 'tree' in title or 'tree' in body or 'root' in title or 'root' in body or 'repeat' in title or 'repeat' in body:
         return 0
-    if 'array' in q or 'list' in q:
+    if 'bit' in title or 'bit' in body or 'xor' in title or 'xor' in body or 'binary' in title or 'binary' in body:  # keep after tree
         return 1
-    if 'string' in q:
+    if 'list' in title or 'list' in body:
         return 2
-    if 'maximum' in q or 'minimum' in q:
+    if 'array' in title or 'array' in body:
         return 3
-    if 'number' in q or 'integer' in q:
+    if 'minimum' in title or 'minimum' in body or 'maximum' in title or 'maximum' in body:
         return 4
-    return 5
+    if 'string' in title or 'string' in body:
+        return 5
+    return 6
+
+
+def is_in_sentence(words, sentence):
+    lemmatizer = nltk.stem.WordNetLemmatizer()
+    sentence_tokens = nltk.word_tokenize(sentence)
+    sentence_lemmas = [lemmatizer.lemmatize(t.lower()) for t in sentence_tokens]
+    word_tokens = nltk.word_tokenize(' '.join(words))
+    word_lemmas = [lemmatizer.lemmatize(t.lower()) for t in word_tokens]
+    return any([t in sentence_lemmas for t in word_lemmas])
 
 
 class Experiment:
@@ -108,7 +136,10 @@ class Experiment:
             label_to_int_dict = {'Easy': 0, 'Medium': 1, 'Hard': 2}
             self.y = np.array([label_to_int_dict[t] for t in labels])
         elif self.target == 'simple_topics':
-            self.y = np.array([simple_topic_tag(q) for q in self.questions])
+            self.y = np.array([topic(v) for k, v in self.leetcode_json.items()])
+        elif self.target == 'story':
+            titles_and_bodies = [f"{v['title']} {v['body']}" for k, v in self.leetcode_json.items()]
+            self.y = np.array([int(is_in_sentence(STORY_WORDS, q)) for q in titles_and_bodies])
         else:
             raise Exception(f'Bad target: {self.target}')
 
@@ -116,8 +147,14 @@ class Experiment:
         print('Number of texts:', len(self.questions))
         print('Average number of tokens per text: ', sum([len(q) for q in self.questions]) / len(self.questions))
         print('Vocabulary size: ', self.vocabulary_size)
+        titles = np.array([v['title'] for k, v in self.leetcode_json.items()])
         for c in np.unique(self.y):
             print(f'Texts in class {c}: ', sum(self.y == c))
+            examples = np.random.choice(titles[self.y == c], size=5, replace=False)
+            print(f'Examples for class {c}:')
+            for i, e in enumerate(examples):
+                print(e)
+            print()
 
 
 def load_leetcode(data_path='data/leetcode/'):
