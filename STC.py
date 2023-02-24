@@ -16,13 +16,15 @@ from data_loader import load_data
 import nltk
 nltk.download('punkt')
 
-# Play with these for differet experiments:
+# Play with these for different experiments:
 KMEANS_INIT = 'default'  # default / slightly_supervised
 KMEANS_N_INIT = 100  # any integer
+NUM_SUPERVISED_POINTS_PER_CLUSTER = 5  # any integer, for use in slightly supervised kmeans init
 
 
 def slightly_supervised_kmeans_init(X, n_clusters, random_state):
-    return np.array([X[y == i][np.random.choice(X[y == i].shape[0], size=1)] for i in range(n_clusters)]).squeeze()
+    return np.array([X[y == i][np.random.choice(X[y == i].shape[0], size=NUM_SUPERVISED_POINTS_PER_CLUSTER)]
+                     for i in range(n_clusters)]).mean(axis=1)
 
 
 def autoencoder(dims, act=tf.nn.leaky_relu, init='glorot_uniform'):

@@ -19,7 +19,7 @@ EXPERIMENT_PARAMS = {
     'sif_alpha': 0.1,  # any float
     'min_word_count': 1,  # any integer
     'word_embedding': 'ada',  # word2vec / glove / ada
-    'target': 'simple_topics',  # difficulty / simple_topics / story
+    'target': 'story',  # difficulty / simple_topics / story
     'input_text': 'title'  # body / title
 }
 
