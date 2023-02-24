@@ -3,7 +3,7 @@
 This repository is based on https://github.com/hadifar/stc_clustering
 and is intended for use in a university course project.
 
-To run an experiment, tweak the parameters in data_loader.py and run
+To run an experiment, tweak the parameters in data_loader.py and STC.py and run
 ```commandline
 python STC.py --dataset leetcode --save_dir data/leetcode/results/
 ```
