@@ -17,8 +17,8 @@ import nltk
 nltk.download('punkt')
 
 # Play with these for different experiments:
-KMEANS_INIT = 'default'  # default / slightly_supervised
-KMEANS_N_INIT = 100  # any integer
+KMEANS_INIT = 'slightly_supervised'  # default / slightly_supervised
+KMEANS_N_INIT = 1  # any integer
 NUM_SUPERVISED_POINTS_PER_CLUSTER = 5  # any integer, for use in slightly supervised kmeans init
 
 
