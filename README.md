@@ -71,5 +71,5 @@ For the **story** target clustering, the number of texts in each class:
 
 | Class | Number of texts |
 |-------|-----------------|
-| 0     | 1688            |
-| 1     | 705             |
+| 0     | 705             |
+| 1     | 983             |
